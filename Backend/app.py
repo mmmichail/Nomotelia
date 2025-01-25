@@ -3,7 +3,6 @@ from flask_cors import CORS
 import json
 from sentence_transformers import SentenceTransformer, util
 
-# Initialize Flask app and enable CORS
 app = Flask(__name__)
 CORS(app)
 
@@ -21,13 +20,22 @@ model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 question_embeddings = model.encode(questions, convert_to_tensor=True)
 
 # Function to find the best match and get the answer
-def get_answer(input_question):
+def get_combined_answers(input_question, threshold=0.8):
+    # Encode the input question
     input_embedding = model.encode(input_question, convert_to_tensor=True)
-    similarities = util.cos_sim(input_embedding, question_embeddings)
-    best_match_idx = similarities.argmax().item()
-    return answers[best_match_idx]
 
-# API Endpoint to get an answer
+    # Compute cosine similarities with all questions
+    similarities = util.cos_sim(input_embedding, question_embeddings)[0]  # [0] for 1D tensor
+
+    # Find indices of questions above the threshold
+    similar_indices = (similarities > threshold).nonzero(as_tuple=True)[0]
+
+    # Combine answers from all similar questions
+    combined_answers = [answers[idx] for idx in similar_indices]
+
+    # Return the combined answers
+    return " | ".join(combined_answers) if combined_answers else "No relevant answers found."
+
 @app.route("/answer", methods=["POST"])
 def answer():
     data = request.json
@@ -37,12 +45,10 @@ def answer():
         return jsonify({"error": "No question provided"}), 400
 
     try:
-        # Get the answer using the ML model
-        response = get_answer(input_question)
+        response = get_combined_answers(input_question)
         return jsonify({"answer": response})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Run the Flask app
 if __name__ == "__main__":
     app.run(debug=True)
