@@ -12,4 +12,4 @@ pip install torch
 pip install sentence-transformers
 
 Got to the path where app.py is, open the terminal there and run python app.py to run the backend.
-To open the app click on index.html
+To run the frontend go to where index.html is, open the terminal there and run python -m http.server 8000.
