@@ -9,17 +9,17 @@ document.getElementById("ask-button").addEventListener("click", async () => {
   hideAnswer(answerElement);
 
   if (!question.trim()) {
-    showAnswer(answerElement, "Please enter a question.");
+    showAnswer(answerElement, "Παρακαλώ εισάγετε μια ερώτηση.");
     return;
   }
 
-  showAnswer(answerElement, "Thinking...");
+  showAnswer(answerElement, "Παρακαλώ περιμένετε...");
 
   try {
     const data = await fetchAnswer(question);
-    showAnswer(answerElement, data.answer || "No answer available.");
+    showAnswer(answerElement, data.answer || "Δεν υπάρχει απάντηση.");
   } catch (error) {
-    showAnswer(answerElement, "An error occurred. Please try again.");
+    showAnswer(answerElement, "Παρουσιάστηκε σφάλμα. Παρακαλώ προσπαθήστε ξανά.");
     console.error(error);
   }
 });
